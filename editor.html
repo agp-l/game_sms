@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ultimate Node Editor V3 - Profesionální verze</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="editor.css">
+</head>
+
+<body>
+
+    <div id="top-bar">
+        <div class="logo"><i class="fa-solid fa-mobile-screen-button"></i> PŘÍBĚHOVÝ ENGINE</div>
+        <div class="controls">
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="setZoom(zoomLevel - 0.1)" title="Oddálit"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                <span id="zoom-display">100%</span>
+                <button class="toolbar-btn" onclick="setZoom(zoomLevel + 0.1)" title="Přiblížit"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                <button class="toolbar-btn" onclick="setZoom(1)" title="Výchozí velikost (100%)"><i class="fa-solid fa-expand"></i></button>
+            </div>
+
+            <div class="toolbar-separator"></div>
+
+            <button class="toolbar-btn" onclick="openContactsModal()" title="Správce kontaktů">
+                <i class="fa-solid fa-address-book"></i>
+            </button>
+            <button class="toolbar-btn" onclick="openInstaModal()" title="Správce Instagramu">
+                <i class="fa-brands fa-instagram" style="color: #e1306c;"></i>
+            </button>
+            <button class="toolbar-btn" onclick="addSceneCenter()" title="Přidat novou bublinu chatu">
+                <i class="fa-solid fa-comment-medical"></i>
+            </button>
+            
+            <div class="toolbar-separator"></div>
+
+            <input type="file" id="fileInput" style="display:none" onchange="importFile(event)">
+            <button class="toolbar-btn" onclick="document.getElementById('fileInput').click()" title="Načíst soubor (story.js)">
+                <i class="fa-solid fa-folder-open"></i>
+            </button>
+            <button class="toolbar-btn save-btn" onclick="exportFile()" title="Uložit příběh (story.js)">
+                <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <div id="canvas">
+            <svg id="lines-svg"></svg>
+            <div id="nodes-container"></div>
+        </div>
+    </div>
+
+    <div id="selection-box"></div>
+
+    <div id="contacts-modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0;"><i class="fa-solid fa-address-book" style="color: #0084ff; margin-right: 8px;"></i> Správce kontaktů</h2>
+            <div id="contacts-list"></div>
+            <button onclick="addContact()" class="btn-blue" style="margin-top: 10px; width: 100%;"><i class="fa-solid fa-user-plus"></i> Přidat osobu</button>
+            <button onclick="closeContactsModal()" style="margin-top: 10px; width: 100%;"><i class="fa-solid fa-check"></i> Zavřít</button>
+        </div>
+    </div>
+    <div id="insta-modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0;"><i class="fa-brands fa-instagram" style="color: #e1306c; margin-right: 8px;"></i> Správce Instagramu</h2>
+            <div id="insta-list"></div>
+            <button onclick="addInstaProfile()" class="btn-blue" style="margin-top: 15px; width: 100%;"><i class="fa-solid fa-user-plus"></i> Přidat nový profil</button>
+            <button onclick="closeInstaModal()" style="margin-top: 10px; width: 100%;"><i class="fa-solid fa-check"></i> Uložit a zavřít</button>
+        </div>
+    </div>
+<script src="editor.js"></script>
+</body>
+</html>

@@ -1,0 +1,505 @@
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            background: #121212;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- NOVÁ HORNÍ LIŠTA --- */
+        #top-bar {
+            height: 56px;
+            background: #18181b;
+            border-bottom: 1px solid #27272a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 600;
+            color: #d4d4d8;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .logo i {
+            color: #0084ff;
+            font-size: 18px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            background: #27272a;
+            border-radius: 6px;
+            padding: 2px;
+            border: 1px solid #3f3f46;
+        }
+
+        .toolbar-btn {
+            background: transparent;
+            color: #a1a1aa;
+            border: none;
+            border-radius: 4px;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: #3f3f46;
+            color: #f4f4f5;
+        }
+
+        .toolbar-btn.save-btn {
+            color: #2ed573;
+        }
+
+        .toolbar-btn.save-btn:hover {
+            background: rgba(46, 213, 115, 0.15);
+            color: #2ed573;
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            background: #3f3f46;
+            margin: 0 8px;
+        }
+
+        #zoom-display {
+            font-size: 11px;
+            color: #a1a1aa;
+            font-weight: 600;
+            width: 45px;
+            text-align: center;
+            user-select: none;
+        }
+
+        /* --- PLOCHA (KANVAS) --- */
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            overflow: auto;
+            background: #141414;
+            background-image: radial-gradient(#2c2c2c 1px, transparent 1px);
+            background-size: 24px 24px;
+            cursor: default;
+        }
+
+        #canvas {
+            width: 50000px;
+            height: 50000px;
+            position: relative;
+            transform-origin: top left;
+        }
+
+        #lines-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #selection-box {
+            position: fixed;
+            border: 1px solid #0084ff;
+            background: rgba(0, 132, 255, 0.2);
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+
+        /* --- BUBLINY (UZLY) --- */
+        .node {
+            position: absolute;
+            width: 340px;
+            background: #202022;
+            border: 2px solid #3c3c3e;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: box-shadow 0.2s, border-color 0.2s;
+            cursor: grab;
+        }
+
+        .node:active {
+            cursor: grabbing;
+        }
+
+        .node input,
+        .node textarea {
+            cursor: text;
+        }
+
+        .node button,
+        .node select {
+            cursor: pointer;
+        }
+
+        .node.selected {
+            border-color: #0084ff;
+            box-shadow: 0 0 0 3px rgba(0, 132, 255, 0.4), 0 8px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Vizuál pro START bublinu */
+        .node.is-start {
+            border-color: #f1c40f;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.4), 0 8px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .node.wire-target {
+            border-color: #2ed573;
+            box-shadow: 0 0 20px rgba(46, 213, 115, 0.4);
+        }
+
+        .node-drag-handle {
+            background: #2d2d30;
+            padding: 8px 12px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            background: #1e1e1e;
+            border: 1px solid #3c3c3e;
+            color: #fff;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: 1px solid #0084ff;
+            border-color: transparent;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.4;
+        }
+
+        .node-body {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: bold;
+            color: #888;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .msg-row {
+            display: flex;
+            gap: 5px;
+            background: #18181a;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #2d2d30;
+            align-items: flex-start;
+        }
+
+        .msg-row select {
+            width: 80px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .choice-block {
+            background: #1a1a1c;
+            border-left: 3px solid #0084ff;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .port-out {
+            position: absolute;
+            right: -7px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            background: #0084ff;
+            border-radius: 50%;
+            cursor: crosshair;
+            z-index: 20;
+            border: 2px solid #202022;
+        }
+
+        .port-out:hover {
+            transform: translateY(-50%) scale(1.3);
+        }
+
+        .node button,
+        #contacts-modal button {
+            background: #2d2d30;
+            color: #eee;
+            border: 1px solid #444;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            transition: 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .node button:hover,
+        #contacts-modal button:hover {
+            background: #3e3e42;
+        }
+
+        .node button.btn-blue,
+        #contacts-modal button.btn-blue {
+            background: #0084ff;
+            color: white;
+            border: none;
+        }
+
+        .node button.btn-blue:hover,
+        #contacts-modal button.btn-blue:hover {
+            background: #006bce;
+        }
+
+        .node button.btn-del {
+            background: transparent;
+            border: none;
+            color: #ff4757;
+            font-size: 14px;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .node button.btn-del:hover {
+            background: rgba(255, 71, 87, 0.2);
+        }
+
+        #contacts-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #202022;
+            padding: 20px;
+            border-radius: 12px;
+            width: 400px;
+            border: 1px solid #3c3c3e;
+        }
+
+        .contact-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .contact-row input[type="color"] {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .contact-row .btn-del {
+            background: transparent;
+            border: none;
+            color: #ff4757;
+            font-size: 16px;
+            cursor: pointer;
+            width: 30px;
+        }
+
+        .contact-row .btn-del:hover {
+            background: rgba(255, 71, 87, 0.2);
+            border-radius: 4px;
+        }
+
+        /* --- INSTAGRAM MANAGER --- */
+        #insta-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #insta-modal .modal-content {
+            width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px;
+        }
+
+        .insta-profile-box {
+            background: #18181a;
+            border: 1px solid #3c3c3e;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .insta-post-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            align-items: center;
+            background: #202022;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #2d2d30;
+        }
+
+        .insta-post-row input,
+        .insta-post-row textarea {
+            font-size: 11px;
+        }
+
+
+
+        /* Oprava bílých políček (Likes a další) */
+        #insta-modal input[type="text"],
+        #insta-modal input[type="number"],
+        #insta-modal textarea {
+            background: #1e1e1e;
+            border: 1px solid #3c3c3e;
+            color: #fff;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        #insta-modal input:focus,
+        #insta-modal textarea:focus {
+            outline: 1px solid #0084ff;
+            border-color: transparent;
+        }
+
+        /* Oprava ošklivých tlačítek "Koš" a "Smazat profil" v Instagramu */
+        #insta-modal .btn-del {
+            background: transparent;
+            border: none;
+            color: #ff4757;
+            font-size: 14px;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #insta-modal .btn-del:hover {
+            background: rgba(255, 71, 87, 0.15);
+        }
+
+        /* Skrytí otravných šipek nahoru/dolů u zadávání čísla (lajků) u některých prohlížečů */
+        #insta-modal input[type="number"]::-webkit-inner-spin-button,
+        #insta-modal input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+
+        /* --- STYLY PRO TLAČÍTKA V INSTAGRAM Okně --- */
+
+        /* Základní styl tlačítka (Uložit a zavřít) */
+        #insta-modal button {
+            background: #2d2d30;
+            color: #eee;
+            border: 1px solid #444;
+            padding: 10px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #insta-modal button:hover {
+            background: #3e3e42;
+        }
+
+        /* Zvýrazněné modré tlačítko (Přidat nový profil) */
+        #insta-modal button.btn-blue {
+            background: #0084ff;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 132, 255, 0.2);
+        }
+
+        #insta-modal button.btn-blue:hover {
+            background: #006bce;
+            box-shadow: 0 4px 12px rgba(0, 132, 255, 0.4);
+        }
