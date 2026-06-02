@@ -63,34 +63,14 @@ body {
     100% { transform: translateX(0); }
 }
 
-/* Plynulý náhodný pohyb — ruka i mobil sdílí stejnou animaci,
-   takže se nikdy nerozdělí. K jejich základním transform hodnotám
-   se jen přičítají/odečítají malé offsety. */
 
-@keyframes naturalFloat {
-    /* 0–75% klid */
-    0%   { translate: 0px 0px;   rotate: 0.0deg; }
-    75%  { translate: 0px 0px;   rotate: 0.0deg; }
-
-    /* 75–95% pohyb */
-    80%  { translate: 30px -40px;  rotate: 0.15deg; }
-    85%  { translate: -20px -70px; rotate: -0.1deg; }
-    88%  { translate: -5px -2px; rotate: 0.2deg; }
-    91%  { translate: 2px 3px;   rotate: -0.15deg; }
-    95%  { translate: 4px -5px;  rotate: 0.1deg; }
-
-    /* 95–100% návrat */
-    100% { translate: 0px 0px;   rotate: 0.0deg; }
-}
 
 
 /* ==========================================================================
    2. REŽIM PRO VELKÉ OBRAZOVKY (POČÍTAČE A MONITORY nad 1024px)
    ========================================================================== */
-   /* ... tvé ostatní styly ... */
 
-   @media (max-width: 1024px) {
-    /* Přidej toto do svého stávajícího media query */
+@media (max-width: 1024px) {
     :root {
         --pov-x: 50% !important;
         --pov-y: 50% !important;
@@ -99,44 +79,76 @@ body {
     .hand-holding-phone {
         display: none !important;
     }
-    
 }
+
+/* Plynulý náhodný pohyb — ruka i mobil sdílí stejnou animaci,
+   takže se nikdy nerozdělí. K jejich základním transform hodnotám
+   se jen přičítají/odečítají malé offsety. */
+
+@keyframes naturalFloat {
+    /* 0–75% klid - žádný pohyb, žádný zoom */
+    0%   { translate: 0px 0px;   rotate: 0.0deg;   --phone-zoom: 1.0; }
+    75%  { translate: 0px 0px;   rotate: 0.0deg;   --phone-zoom: 1.0; }
+
+    /* 75–95% pohyb - ruka se hýbe a mobil se mírně přibližuje k hráči */
+    80%  { translate: 30px -40px;  rotate: 0.15deg;  --phone-zoom: 1.0; } 
+    85%  { translate: -20px -70px; rotate: -0.1deg;  --phone-zoom: 1.2; } /* Zde je největší výkyv i největší zoom */
+    88%  { translate: -5px -2px;   rotate: 0.2deg;   --phone-zoom: 1.1; }
+    91%  { translate: 2px 3px;     rotate: -0.15deg; --phone-zoom: 1.0; }
+    95%  { translate: 4px -5px;    rotate: 0.1deg;   --phone-zoom: 1.0; } /* Zde už je ruka v klidu a zoom zpět na 1.0 */
+
+    /* 95–100% návrat */
+    100% { translate: 0px 0px;   rotate: 0.0deg;   --phone-zoom: 1.0; }
+}
+
+/* Animace dýchání vázaná PŘÍMO na tvoji proměnnou (ne na nativní scale).
+   Prohlížeč k ní přistupuje jako k normálnímu číslu, se kterým dál počítá. */
+@property --phone-zoom {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 1.0;
+}
+
 
 @media (min-width: 1025px) {
 
-    #bg-video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Zajišťuje, že video vyplní prostor jako cover u obrázku */
-    z-index: -1;       /* Bude pod mlhou, ale nad .background-scenerie */
-    filter: brightness(0.7) contrast(1.1); /* Stejný filtr jako u obrázku */
-    pointer-events: none; /* Důležité: video nesmí blokovat interakci s hrou */
-}
+    /* 1. ZDE NASTAVUJEŠ VÝCHOZÍ VELIKOST */
+    :root {
+        --phone-zoom: 1.0; 
+    }
 
-/* Pokud máš statický obrázek, ten bude teď schovaný pod videem */
-.background-scenerie {
-    z-index: -2; /* Posuneme ještě níž, video ho zakryje */
-}
+    #bg-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; 
+        z-index: -1;       
+        filter: brightness(0.7) contrast(1.1); 
+        pointer-events: none; 
+    }
+
+    .background-scenerie {
+        z-index: -2; 
+    }
 
    #phone-container {
-        /* 1. VNĚJŠÍ VZHLED A POZICE (Velikost mobilu a jeho umístění na monitoru) */
         position: absolute;
         top: var(--pov-y);
         left: var(--pov-x);
         transition: top 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), left 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-        width: 308px;       
-        height: 648px;      
+        width: 288px;       
+        height: 645px;      
         background-color: #fff;
         border-radius: 12px; 
         box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
-        transform: translate(-50%, -50%) rotate(0.0deg) translate(-140px, 0px);
+        
+        transform: translate(-50%, -50%) scale(var(--phone-zoom)) rotate(0.0deg) translate(-125px, 0px);
+        
+        /* ZDE JE ZMĚNA: Přidána animace idleZoom na 14 vteřin */
         animation: naturalFloat 20s ease-in-out infinite;
         z-index: 10; 
-        
-        /* 2. VNITŘNÍ USPOŘÁDÁNÍ (Flexbox pro správné skládání lišt a aplikací pod sebe) */
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -144,30 +156,30 @@ body {
 
     .hand-holding-phone {
         position: absolute;
-        /* ZDE JE ZMĚNA: Použití proměnných a plynulý přechod */
         top: var(--pov-y);
         left: var(--pov-x);
         transition: top 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), left 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-        
-        transform: translate(-50%, -50%) translateY(231px) translateX(5px);
         height: 1200px; 
         width: auto;
+        
+        transform: translate(-50%, -50%) scale(var(--phone-zoom)) translateY(238px) translateX(7px);
+        
         object-fit: contain;
         z-index: 5; 
         pointer-events: none; 
         display: block;
+        
+        /* ZDE JE ZMĚNA: Přidána animace idleZoom na 14 vteřin */
         animation: naturalFloat 20s ease-in-out infinite;
         filter: brightness(0.3);
     }
 }
-
-
 /* ==========================================================================
    3. REŽIM PRO MOBILY A TABLETY (POD 1024px)
    ========================================================================== */
 @media (max-width: 1024px) {
 
-/* Skryjeme video úplně */
+    /* Skryjeme video úplně */
     #bg-video {
         display: none !important;
     }
@@ -175,7 +187,7 @@ body {
     /* Ujistíme se, že statické pozadí je vidět */
     .background-scenerie {
         display: block !important;
-        filter: brightness(0.3) contrast(1.2); /* zachováme stejné ztmavení */
+        filter: brightness(0.3) contrast(1.2); 
     }
 
     /* Skryjeme mlhu, pokud v mobilu dělá neplechu */
@@ -186,12 +198,14 @@ body {
     /* Grafikou ruky s nakresleným mobilem nebudeme hráče na mobilu mást, schováme ji */
     .hand-holding-phone {
         display: none !important;
+        /* OPRAVA: Vypnutí animace na mobilu */
+        animation: none !important; 
     }
-
+    
     /* Funkční herní displej roztáhneme na celou obrazovku jako reálnou aplikaci */
     #phone-container {
         width: 100%;
-        max-width: 450px; /* Ochrana, aby to na tabletech nebylo extrémně široké */
+        max-width: 450px; 
         height: 100vh;
         background-color: #fff;
         display: flex;
@@ -201,12 +215,13 @@ body {
         border: none;
         border-radius: 0;
         box-shadow: none;
-        transform: none; /* Vypneme rotaci a posuny z PC verze */
+        transform: none; 
         top: 0;
         left: 0;
+        /* OPRAVA: Natvrdo zakážeme plavání a zoomování na malých displejích */
+        animation: none !important; 
     }
 }
-
 
 /* ==========================================================================
    4. VNITŘNÍ ROZHRANÍ SIMULOVANÉHO MESSENGERU

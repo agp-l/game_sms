@@ -336,6 +336,12 @@ function processSceneEngine() {
         }
 
         // Funkce pro aktualizaci textu (text teď zabírá celou šířku nahoře)
+       // --- PROMĚNNÁ PRO KONTROLU EFEKTU ---
+        // Potřebujeme si pamatovat běžící animaci, abychom ji mohli zrušit, 
+        // když hráč rychle klikne na další šipku dřív, než se text dopíše.
+        let carouselTypingTimeout = null;
+
+        // Funkce pro aktualizaci textu (text teď zabírá celou šířku nahoře)
         function updateCarousel(direction) {
             contentDiv.innerHTML = ""; 
             const choice = scene.choices[currentChoiceIndex];
@@ -344,7 +350,8 @@ function processSceneEngine() {
             
             const textDiv = document.createElement("div");
             textDiv.className = `choice-text-full slide-in-${direction}`;
-            textDiv.innerHTML = choice.text;
+            // ZDE JE ZMĚNA: Na začátku necháme text prázdný
+            textDiv.innerHTML = ""; 
             
             contentDiv.appendChild(textDiv);
 
@@ -355,6 +362,28 @@ function processSceneEngine() {
             btnRight.style.opacity = btnRight.disabled ? "0.3" : "1";
             btnLeft.style.cursor = btnLeft.disabled ? "default" : "pointer";
             btnRight.style.cursor = btnRight.disabled ? "default" : "pointer";
+
+            // Zastavíme předchozí psaní, pokud hráč přepnul volbu moc rychle
+            clearTimeout(carouselTypingTimeout);
+            
+            let typeIndex = 0;
+            const textToType = choice.text;
+
+            // Funkce pro postupné vypsání
+            function typeNextChar() {
+                if (typeIndex < textToType.length) {
+                    textDiv.innerHTML += textToType.charAt(typeIndex);
+                    typeIndex++;
+                    
+                    // Rychlost psaní (10 až 25 milisekund) – je to záměrně rychlejší,
+                    // aby hráč nemusel čekat půl hodiny na přečtení jedné volby
+                    const typingSpeed = Math.floor(Math.random() * 15) + 10; 
+                    carouselTypingTimeout = setTimeout(typeNextChar, typingSpeed);
+                }
+            }
+            
+            // Spuštění efektu pro aktuálně vybranou volbu
+            typeNextChar();
         }
 
         // --- EXEKUCE VOLBY JE NYNÍ NAPOJENÁ NA TLAČÍTKO "ODESLAT" DOLE VLIŠTĚ ---

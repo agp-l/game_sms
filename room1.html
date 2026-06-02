@@ -17,6 +17,11 @@
 
 <body>
 
+
+    <canvas id="backgroundCanvas"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none;">
+    </canvas>
+
     <div class="main-container">
 
        <video id="bg-video" autoplay loop muted playsinline poster="image/bg1.jpg">
@@ -106,7 +111,7 @@
             <div class="phone-home-btn" onclick="goHome()" title="Zpět na plochu"></div>
 
         </div> </div> <script src="script.js"></script>
-
+<script src="magic.js"></script>
 </body>
 
 </html>
